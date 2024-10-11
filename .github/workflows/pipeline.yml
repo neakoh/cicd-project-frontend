@@ -151,12 +151,11 @@ jobs:
           echo "Contents of tfvars.env:"
           cat tfvars.env
 
-      - name: Load environment variables
+      - name: Load env file
         run: |
-          echo "Loading environment variables..."
-          set -o allexport  # Automatically export all variables
-          source tfvars.env  # Load the variables from the file
-          set +o allexport  # Stop automatically exporting variables
+          cat tfvars.env >> $GITHUB_ENV
+          sed -i 's/^/export /' tfvars.env
+          source tfvars.env
 
       - name: Verify loaded variables
         run: |
