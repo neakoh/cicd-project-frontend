@@ -26,15 +26,15 @@ jobs:
       - name: Build Docker image
         run: |
           echo "Building Docker image..."
-          docker build -t ${{ secrets.REPO_NAME }}:latest .
+          docker build -t basic-blog:latest .
 
       - name: Run Trivy scan on Docker image
         run: |
           echo "Running Trivy scan on Docker image"
           curl -sSL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -
           export PATH=$PATH:$(pwd)/bin
-          trivy image --exit-code 0 --severity HIGH,CRITICAL ${{ secrets.REPO_NAME }}:latest || true
-          trivy image --format json --output trivy-results.json ${{ secrets.REPO_NAME }}:latest
+          trivy image --exit-code 0 --severity HIGH,CRITICAL basic-blog:latest || true
+          trivy image --format json --output trivy-results.json basic-blog:latest
 
       - name: Log in to Amazon ECR
         run: |
@@ -45,8 +45,8 @@ jobs:
         run: |
           echo "Pushing Docker image to ECR..."
           TIMESTAMP=$(date +%Y%m%d%H%M%S)
-          IMAGE_TAG="${{ secrets.REPO_NAME }}:$TIMESTAMP"
-          docker tag ${{ secrets.REPO_NAME }}:latest ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_DEFAULT_REGION }}.amazonaws.com/$IMAGE_TAG
+          IMAGE_TAG="basic-blog:$TIMESTAMP"
+          docker tag basic-blog:latest ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_DEFAULT_REGION }}.amazonaws.com/$IMAGE_TAG
           docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_DEFAULT_REGION }}.amazonaws.com/$IMAGE_TAG
           echo "TF_VAR_image_uri=${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_DEFAULT_REGION }}.amazonaws.com/$IMAGE_TAG" >> build.env
 
