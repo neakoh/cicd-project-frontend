@@ -1,0 +1,45 @@
+import "tfplan/v2" as tfplan
+import "tfrun" as run
+import "strings"
+
+# Define variables
+messages = []
+launch_type = "FARGTE"
+resource = "ECS"
+# Main rule
+secrets_manager_checks = func() {
+  # Retrieve resource info
+  if run.is_destroy == true {
+  	return true
+  }
+  ecs = filter tfplan.resource_changes as _, rc {
+    rc.mode is "managed" and
+    rc.type is "aws_ecs_service"
+  }
+  # Checking if resource exists.
+  if length(ecs) == 0 {
+    append(messages, "No ecs service found.")
+  }
+  # Looping through resources
+  for ecs as address, ecs{
+    print(ecs.change.after)
+    if(ecs.change.after.launch_type != ecs_launch_type){
+      append(messages, "ECS launch type not " + ecs_launch_type)
+    }
+  }
+  # Checking if any misconfigurations exist
+  if length(messages) != 0 {
+    print(resource + " misconfigurations:")
+    counter = 1
+  	for messages as message{
+    	print(string(counter) + ". " + message)
+      counter += 1
+    }
+    return false
+  }
+  return true
+}
+# Main rule
+main = rule {
+ 		secrets_manager_checks()
+}

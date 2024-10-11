@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Blog</title>
+    <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+    <header>
+        <h1>Simple Blog</h1>
+        <nav>
+            <ul>
+                <li><a href="#" id="home">Home</a></li>
+                <li><a href="#" id="newPostLink">New Post</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <!-- Sign-in form -->
+    <div id="auth-section">
+        <h2>Sign In</h2>
+        <label>Email: <input type="email" id="email"></label>
+        <label>Name: <input type="name" id="name"></label>
+        <label>Password: <input type="password" id="password"></label>
+        <div id="buttons">
+            <button id="signin">Sign In</button>
+            <button id="signup">Sign Up</button>
+            <button id="signout">Sign Out</button></div>
+        <label>Confirmation Code: <input type="text" id="confirmationCode"></label>
+        <button id="confirm">Confirm Account</button>       
+    </div>
+
+    <!-- Blog content -->
+    <section id="content"></section>
+
+    <!-- New Post Form (Hidden until signed in) -->
+    <div id="new-post" style="display:none;">
+        <h2>Create New Post</h2>
+        <form id="postForm">
+            <input type="text" id="postTitle" placeholder="Post Title" required>
+            <textarea id="postContent" placeholder="Post Content" required></textarea>
+            <button type="submit">Submit</button>
+        </form>
+    </div>
+
+    <footer>
+        <p>&copy; 2024 Simple Blog. All rights reserved.</p>
+    </footer>
+    <script src="https://cdn.jsdelivr.net/npm/amazon-cognito-identity-js@5.1.1/dist/amazon-cognito-identity.min.js"></script>
+    <script src="./script.js"></script>
+</body>
+</html>

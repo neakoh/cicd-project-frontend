@@ -1,0 +1,102 @@
+image: docker:latest
+services:
+- docker:dind
+variables:
+  DOCKER_HOST: tcp://docker:2375/
+  DOCKER_DRIVER: overlay2
+  REPO_NAME: gitlab-cicd
+include:
+  - template: Jobs/Dependency-Scanning.gitlab-ci.yml
+  - template: Jobs/SAST.gitlab-ci.yml
+  - template: Jobs/Secret-Detection.gitlab-ci.yml
+stages:
+  - test
+  - build-image
+  - fetch-terraform-outputs
+  - update-terraform
+build:
+  stage: build-image
+  before_script:
+  - apk add --no-cache aws-cli
+  - apk add --no-cache curl
+  script:
+  - echo "Building Docker image..."
+  - docker build -t $REPO_NAME:latest .
+  - echo "Running Trivy scan on Docker image"
+  - curl -sSL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh
+    | sh -
+  - export PATH=$PATH:$(pwd)/bin
+  - trivy image --exit-code 0 --severity HIGH,CRITICAL $REPO_NAME:latest || true
+  - trivy image --format json --output trivy-results.json $REPO_NAME:latest
+  - echo "Logging in to Amazon ECR..."
+  - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username
+    AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com
+  - echo "Pushing Docker image to ECR..."
+  - TIMESTAMP=$(date +%Y%m%d%H%M%S)
+  - IMAGE_TAG="$REPO_NAME:$TIMESTAMP"
+  - docker tag $REPO_NAME:latest $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_TAG
+  - docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_TAG
+  - echo "TF_VAR_image_uri=$AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_TAG"
+    >> build.env
+  artifacts:
+    paths:
+    - build.env
+fetch-terraform-outputs:
+  stage: fetch-terraform-outputs
+  image: alpine:latest
+  script:
+  - apk add --no-cache curl jq
+  - echo "Creating variables for specific outputs..."
+  - "curl -s -X GET \\\n  \"https://app.terraform.io/api/v2/workspaces/${HCP_WORKSPACE_ID}/current-state-version-outputs\"
+    \\\n  --ssl-no-revoke \\\n  -H \"Authorization: Bearer ${HCP_TOKEN}\" \\\n  -H
+    'Content-Type: application/vnd.api+json' | \\\njq -r '.data[] | select(.attributes.name
+    | test(\"public_subnet_ids|alb-sg-id|container-sg-id|vpc_id\")) | \n  if .attributes.name
+    == \"public_subnet_ids\" then\n    \"PUBLIC_SUBNET_IDS=\\(.attributes.value)\"\n
+    \ elif .attributes.name == \"alb-sg-id\" then\n    \"ALB_SG_ID=\\(.attributes.value)\"\n
+    \ elif .attributes.name == \"container-sg-id\" then\n    \"CONTAINER_SG_ID=\\(.attributes.value)\"\n
+    \ elif .attributes.name == \"vpc_id\" then\n    \"VPC_ID=\\(.attributes.value)\"\n
+    \ else\n    empty\n  end' > terraform_outputs.env\n"
+  - echo "Contents of terraform_outputs.env:"
+  - cat terraform_outputs.env
+  artifacts:
+    reports:
+      dotenv: terraform_outputs.env
+update-terraform:
+  stage: update-terraform
+  image: alpine:latest
+  dependencies:
+  - build
+  - fetch-terraform-outputs
+  before_script:
+  - apk add --no-cache git
+  - git config --global user.email "theenickymain@gmail.com"
+  - git config --global user.name "neakoh"
+  script:
+  - echo "Contents of current directory:"
+  - ls -la
+  - echo "Contents of build.env:"
+  - cat build.env || echo "build.env not found"
+  - echo "Contents of terraform_outputs.env:"
+  - cat terraform_outputs.env || echo "terraform_outputs.env not found"
+  - export $(cat build.env | xargs)
+  - export $(cat terraform_outputs.env | xargs)
+  - echo "Cloning repository..."
+  - git clone https://neakoh:${GITLAB_PAT}@gitlab.com/test9824139/Test.git || exit
+    1
+  - cd Test
+  - echo "Creating/Updating TF_vars file..."
+  - |
+    cat << EOF > terraform.tfvars
+    image_uri = "${TF_VAR_image_uri}"
+    public_subnet_ids = ${PUBLIC_SUBNET_IDS}
+    alb_sg_id = "${ALB_SG_ID}"
+    container_sg_id = "${CONTAINER_SG_ID}"
+    vpc_id = "${VPC_ID}"
+    EOF
+  - git add terraform.tfvars
+  - git commit -m "Update image URI and Terraform outputs in TF_vars [ci skip]" ||
+    echo "No changes to commit"
+  - TAG_NAME="$(date +%Y.%m.%d-%H%M%S)"
+  - echo "Creating a new tag $TAG_NAME"
+  - git tag -a $TAG_NAME -m "Release version $TAG_NAME [ci skip]"
+  - git push origin HEAD:main --tags || exit 1
