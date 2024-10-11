@@ -141,11 +141,6 @@ jobs:
           vpc_id = "${VPC_ID}"
           EOF
 
-      - name: Configure Git
-        run: |
-          git config --global user.email "your-email@example.com"  # Replace with your email
-          git config --global user.name "your-github-username"  # Replace with your GitHub username
-
       - name: Commit and push terraform.tfvars
         run: |
           git add terraform.tfvars
