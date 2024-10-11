@@ -3,7 +3,7 @@ name: update main.tf
 on:
   push:
     branches: [main]
-    
+
 jobs:
   scan:
       runs-on: ubuntu-latest
@@ -75,43 +75,43 @@ jobs:
           name: build-env
           path: build.env
 
-fetch-outputs:
-  runs-on: ubuntu-latest
-  needs: build
-  steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
+  fetch-outputs:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-    - name: Install dependencies
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y curl jq
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y curl jq
 
-    - name: Fetch Terraform outputs
-      run: |
-        echo "Creating variables for specific outputs..."
-        curl -s -X GET "https://app.terraform.io/api/v2/workspaces/${{ secrets.HCP_WORKSPACE_ID }}/current-state-version-outputs" \
-          --ssl-no-revoke \
-          -H "Authorization: Bearer ${{ secrets.HCP_TOKEN }}" \
-          -H 'Content-Type: application/vnd.api+json' | \
-          jq -r '.data[] | select(.attributes.name | test("public_subnet_ids|alb-sg-id|container-sg-id|vpc_id")) | 
-          if .attributes.name == "public_subnet_ids" then
-            "PUBLIC_SUBNET_IDS=\\(.attributes.value)"
-          elif .attributes.name == "alb-sg-id" then
-            "ALB_SG_ID=\\(.attributes.value)"
-          elif .attributes.name == "container-sg-id" then
-            "CONTAINER_SG_ID=\\(.attributes.value)"
-          elif .attributes.name == "vpc_id" then
-            "VPC_ID=\\(.attributes.value)"
-          else
-            empty
-          end' > terraform_outputs.env
+      - name: Fetch Terraform outputs
+        run: |
+          echo "Creating variables for specific outputs..."
+          curl -s -X GET "https://app.terraform.io/api/v2/workspaces/${{ secrets.HCP_WORKSPACE_ID }}/current-state-version-outputs" \
+            --ssl-no-revoke \
+            -H "Authorization: Bearer ${{ secrets.HCP_TOKEN }}" \
+            -H 'Content-Type: application/vnd.api+json' | \
+            jq -r '.data[] | select(.attributes.name | test("public_subnet_ids|alb-sg-id|container-sg-id|vpc_id")) | 
+            if .attributes.name == "public_subnet_ids" then
+              "PUBLIC_SUBNET_IDS=\\(.attributes.value)"
+            elif .attributes.name == "alb-sg-id" then
+              "ALB_SG_ID=\\(.attributes.value)"
+            elif .attributes.name == "container-sg-id" then
+              "CONTAINER_SG_ID=\\(.attributes.value)"
+            elif .attributes.name == "vpc_id" then
+              "VPC_ID=\\(.attributes.value)"
+            else
+              empty
+            end' > terraform_outputs.env
 
-    - name: Upload terraform_outputs.env as artifact
-      uses: actions/upload-artifact@v3
-      with:
-        name: terraform-outputs
-        path: terraform_outputs.env
+      - name: Upload terraform_outputs.env as artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: terraform-outputs
+          path: terraform_outputs.env
 
   update-terraform:
     runs-on: ubuntu-latest
