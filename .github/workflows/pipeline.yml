@@ -122,41 +122,32 @@ jobs:
 
       - name: Set up Git
         run: |
-          git config --global user.email "your-email@example.com"
-          git config --global user.name "your-github-username"
+          git config --global user.email "theenickymain@gmail.com"
+          git config --global user.name "neakoh"
 
       - name: Load environment variables
         run: |
           echo "Loading environment variables..."
-          echo "Contents of build.env:"
-          cat build.env || echo "build.env not found"
-          echo "Contents of terraform_outputs.env:"
-          cat terraform_outputs.env || echo "terraform_outputs.env not found"
-          export $(cat build.env | xargs)
           export $(cat terraform_outputs.env | xargs)
 
-      - name: Clone repository
+      - name: Create terraform.tfvars file
         run: |
-          echo "Cloning repository..."
-          git clone https://github.com/your-username/your-repo.git || exit 1
-          cd your-repo
-
-      - name: Create/Update TF_vars file
-        run: |
-          echo "Creating/Updating TF_vars file..."
+          echo "Creating terraform.tfvars file..."
           cat << EOF > terraform.tfvars
-          image_uri = "${TF_VAR_image_uri}"
+          image_uri = "${{ secrets.TF_VAR_IMAGE_URI }}"  # Assuming this is set in your secrets
           public_subnet_ids = ${PUBLIC_SUBNET_IDS}
           alb_sg_id = "${ALB_SG_ID}"
           container_sg_id = "${CONTAINER_SG_ID}"
           vpc_id = "${VPC_ID}"
           EOF
 
-      - name: Commit and push changes
+      - name: Configure Git
+        run: |
+          git config --global user.email "your-email@example.com"  # Replace with your email
+          git config --global user.name "your-github-username"  # Replace with your GitHub username
+
+      - name: Commit and push terraform.tfvars
         run: |
           git add terraform.tfvars
-          git commit -m "Update image URI and Terraform outputs in TF_vars [ci skip]" || echo "No changes to commit"
-          TAG_NAME="$(date +%Y.%m.%d-%H%M%S)"
-          echo "Creating a new tag $TAG_NAME"
-          git tag -a $TAG_NAME -m "Release version $TAG_NAME [ci skip]"
-          git push origin HEAD:main --tags || exit 1
+          git commit -m "Update terraform.tfvars with outputs from Terraform Cloud [ci skip]" || echo "No changes to commit"
+          git push origin main  # Change 'main' to your default branch if different
