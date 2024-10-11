@@ -107,6 +107,11 @@ jobs:
               empty
             end' > tfvars.env
 
+      - name: Display tfvars.env contents
+        run: |
+          echo "Contents of tfvars.env:"
+          cat tfvars.env
+
       - name: Upload terraform_outputs.env as artifact
         uses: actions/upload-artifact@v3
         with:
@@ -133,7 +138,6 @@ jobs:
       - name: Create terraform.tfvars file
         run: |
           echo "Creating terraform.tfvars file..."
-          cat tfvars.env
           image_uri = "${IMAGE_URI}"
           public_subnet_ids = ${PUBLIC_SUBNET_IDS}
           alb_sg_id = "${ALB_SG_ID}"
