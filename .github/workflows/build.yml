@@ -51,7 +51,7 @@ jobs:
           echo "TF_VAR_image_uri=${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_DEFAULT_REGION }}.amazonaws.com/$IMAGE_TAG" >> build.env
 
       - name: Upload build.env as artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: build-env
           path: build.env
