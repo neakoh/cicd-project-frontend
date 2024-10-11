@@ -54,9 +54,9 @@ jobs:
           echo "Pushing Docker image to ECR..."
           TIMESTAMP=$(date +%Y%m%d%H%M%S)
           IMAGE_TAG="basic-blog:$TIMESTAMP"
-          docker tag basic-blog:latest ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_DEFAULT_REGION }}.amazonaws.com/$IMAGE_TAG
-          docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_DEFAULT_REGION }}.amazonaws.com/$IMAGE_TAG
-          echo "TF_VAR_image_uri=${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_DEFAULT_REGION }}.amazonaws.com/$IMAGE_TAG" >> build.env
+          docker tag basic-blog:latest 851725435775.dkr.ecr.eu-west-2.amazonaws.com/$IMAGE_TAG
+          docker push 851725435775.dkr.ecr.eu-west-2.amazonaws.com/$IMAGE_TAG
+          echo "TF_VAR_image_uri=851725435775.dkr.ecr.eu-west-2.amazonaws.com/$IMAGE_TAG" >> build.env
 
       - name: Upload build.env as artifact
         uses: actions/upload-artifact@v3
