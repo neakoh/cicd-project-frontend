@@ -47,7 +47,7 @@ jobs:
         run: |
           echo "Logging in to Amazon ECR..."
           echo aws-region
-          aws ecr get-login-password --region ${{ secrets.AWS_DEFAULT_REGION }} | docker login --username AWS --password-stdin ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_DEFAULT_REGION }}.amazonaws.com
+          aws ecr get-login-password --region eu-west-2 | docker login --username AWS --password-stdin 851725435775.dkr.ecr.eu-west-2.amazonaws.com
 
       - name: Push Docker image to ECR
         run: |
