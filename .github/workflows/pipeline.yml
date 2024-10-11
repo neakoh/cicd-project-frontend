@@ -145,7 +145,12 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: tfvars
-       
+
+      - name: Check tfvars.env contents
+        run: |
+          echo "Contents of tfvars.env:"
+          cat tfvars.env
+
       - name: Load environment variables
         run: |
           echo "Loading environment variables..."
@@ -161,6 +166,11 @@ jobs:
           container_sg_id = "${CONTAINER_SG_ID}"
           vpc_id = "${VPC_ID}"
           EOF
+
+      - name: Check terraform.tfvars contents
+        run: |
+          echo "Contents of terraform.tfvars:"
+          cat terraform.tfvars
 
       - name: Set up Git
         run: |
