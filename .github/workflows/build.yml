@@ -1,0 +1,57 @@
+name: build application image
+
+on:
+  workflow_run:
+    workflows: ["scan"]
+    branches: [main]
+    types: 
+      - completed
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Install AWS CLI
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y awscli curl
+
+      - name: Build Docker image
+        run: |
+          echo "Building Docker image..."
+          docker build -t ${{ secrets.REPO_NAME }}:latest .
+
+      - name: Run Trivy scan on Docker image
+        run: |
+          echo "Running Trivy scan on Docker image"
+          curl -sSL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -
+          export PATH=$PATH:$(pwd)/bin
+          trivy image --exit-code 0 --severity HIGH,CRITICAL ${{ secrets.REPO_NAME }}:latest || true
+          trivy image --format json --output trivy-results.json ${{ secrets.REPO_NAME }}:latest
+
+      - name: Log in to Amazon ECR
+        run: |
+          echo "Logging in to Amazon ECR..."
+          aws ecr get-login-password --region ${{ secrets.AWS_DEFAULT_REGION }} | docker login --username AWS --password-stdin ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_DEFAULT_REGION }}.amazonaws.com
+
+      - name: Push Docker image to ECR
+        run: |
+          echo "Pushing Docker image to ECR..."
+          TIMESTAMP=$(date +%Y%m%d%H%M%S)
+          IMAGE_TAG="${{ secrets.REPO_NAME }}:$TIMESTAMP"
+          docker tag ${{ secrets.REPO_NAME }}:latest ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_DEFAULT_REGION }}.amazonaws.com/$IMAGE_TAG
+          docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_DEFAULT_REGION }}.amazonaws.com/$IMAGE_TAG
+          echo "TF_VAR_image_uri=${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_DEFAULT_REGION }}.amazonaws.com/$IMAGE_TAG" >> build.env
+
+      - name: Upload build.env as artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: build-env
+          path: build.env
