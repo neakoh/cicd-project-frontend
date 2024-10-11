@@ -69,6 +69,17 @@ jobs:
           docker push 851725435775.dkr.ecr.eu-west-2.amazonaws.com/$IMAGE_TAG
           echo "TF_VAR_image_uri=851725435775.dkr.ecr.eu-west-2.amazonaws.com/$IMAGE_URI" >> tfvars.env
 
+      - name: Check tfvars.env file
+        run: |
+          echo "Checking if tfvars.env file is created..."
+          if [ -f tfvars.env ]; then
+            echo "tfvars.env file exists. Contents:"
+            cat tfvars.env
+          else
+            echo "tfvars.env file does not exist."
+            exit 1  # Fail the job if the file does not exist
+          fi
+          
       - name: Upload tfvars.env as artifact
         uses: actions/upload-artifact@v3
         with:
@@ -106,6 +117,10 @@ jobs:
             else
               empty
             end' > tfvars.env
+
+          # Debug: Print the contents of tfvars.env
+          echo "Contents of tfvars.env:"
+          cat tfvars.env
 
       - name: Display tfvars.env contents
         run: |
