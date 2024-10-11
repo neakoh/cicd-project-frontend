@@ -72,7 +72,7 @@ jobs:
       - name: Upload tfvars.env as artifact
         uses: actions/upload-artifact@v3
         with:
-          name: tfvars-env
+          name: tfvars
           path: tfvars.env
 
   fetch-outputs:
@@ -110,7 +110,7 @@ jobs:
       - name: Upload terraform_outputs.env as artifact
         uses: actions/upload-artifact@v3
         with:
-          name: tfvars-env
+          name: tfvars
           path: tfvars.env
 
   update-terraform:
@@ -120,6 +120,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
+      - name: Download tfvars.env artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: tfvars
+       
       - name: Load environment variables
         run: |
           echo "Loading environment variables..."
