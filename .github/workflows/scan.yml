@@ -19,6 +19,6 @@ jobs:
         with:
 
           args:
-            -Dsonar.projectKey=neakoh
+            -Dsonar.projectKey=neakoh_cicd-project-frontend
             -Dsonar.organization=neakoh
           projectBaseDir: .
