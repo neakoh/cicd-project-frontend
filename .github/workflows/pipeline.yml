@@ -83,8 +83,8 @@ jobs:
       - name: Upload tfvars.env as artifact
         uses: actions/upload-artifact@v3
         with:
-          name: tfvars
-          path: tfvars.env
+          name: image_uri
+          path: image_uri.env
 
   fetch-outputs:
     runs-on: ubuntu-latest
@@ -144,15 +144,18 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: tfvars
+          name: image_uri
        
       - name: Load environment variables
         run: |
           echo "Loading environment variables..."
           export $(cat tfvars.env | xargs)
+          export $(cat image_uri.env | xargs)
 
       - name: Create terraform.tfvars file
         run: |
           echo "Creating terraform.tfvars file..."
+          cat << EOF > terraform.tfvars
           image_uri = "${IMAGE_URI}"
           public_subnet_ids = ${PUBLIC_SUBNET_IDS}
           alb_sg_id = "${ALB_SG_ID}"
