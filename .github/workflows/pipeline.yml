@@ -150,6 +150,12 @@ jobs:
         run: |
           echo "Loading environment variables..."
           export $(cat tfvars.env | xargs)
+          echo ${IMAGE_URI}
+
+      - name: Check tfvars.env contents
+        run: |
+          echo "Contents of tfvars.env:"
+          cat tfvars.env
 
       - name: Create terraform.tfvars file
         run: |
