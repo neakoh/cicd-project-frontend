@@ -128,6 +128,7 @@ jobs:
       - name: Load environment variables
         run: |
           echo "Loading environment variables..."
+          echo cat tfvars.env
           export $(cat tfvars.env | xargs)
 
       - name: Create terraform.tfvars file
