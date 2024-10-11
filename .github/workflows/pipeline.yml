@@ -83,8 +83,8 @@ jobs:
       - name: Upload tfvars.env as artifact
         uses: actions/upload-artifact@v3
         with:
-          name: image_uri
-          path: image_uri.env
+          name: tfvars
+          path: tfvars.env
 
   fetch-outputs:
     runs-on: ubuntu-latest
@@ -92,6 +92,11 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
+
+      - name: Download tfvars.env artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: tfvars
 
       - name: Install dependencies
         run: |
@@ -116,13 +121,9 @@ jobs:
               "VPC_ID=\\(.attributes.value)"
             else
               empty
-            end' > tfvars.env
+            end' >> tfvars.env
 
-          # Debug: Print the contents of tfvars.env
-          echo "Contents of tfvars.env:"
-          cat tfvars.env
-
-      - name: Display tfvars.env contents
+      - name: Check tfvars.env contents
         run: |
           echo "Contents of tfvars.env:"
           cat tfvars.env
@@ -144,13 +145,11 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: tfvars
-          name: image_uri
        
       - name: Load environment variables
         run: |
           echo "Loading environment variables..."
           export $(cat tfvars.env | xargs)
-          export $(cat image_uri.env | xargs)
 
       - name: Create terraform.tfvars file
         run: |
