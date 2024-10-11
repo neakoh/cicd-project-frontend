@@ -146,11 +146,6 @@ jobs:
         with:
           name: tfvars
 
-      - name: Check tfvars.env contents
-        run: |
-          echo "Contents of tfvars.env:"
-          cat tfvars.env
-
       - name: Load environment variables
         run: |
           echo "Loading environment variables..."
@@ -160,11 +155,11 @@ jobs:
         run: |
           echo "Creating terraform.tfvars file..."
           cat << EOF > terraform.tfvars
-          image_uri = "${IMAGE_URI}"
-          public_subnet_ids = ${PUBLIC_SUBNET_IDS}
-          alb_sg_id = "${ALB_SG_ID}"
-          container_sg_id = "${CONTAINER_SG_ID}"
-          vpc_id = "${VPC_ID}"
+          image_uri = "$IMAGE_URI"
+          public_subnet_ids = $PUBLIC_SUBNET_IDS
+          alb_sg_id = "$ALB_SG_ID"
+          container_sg_id = "$CONTAINER_SG_ID"
+          vpc_id = "$VPC_ID"
           EOF
 
       - name: Check terraform.tfvars contents
