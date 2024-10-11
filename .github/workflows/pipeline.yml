@@ -128,13 +128,12 @@ jobs:
       - name: Load environment variables
         run: |
           echo "Loading environment variables..."
-          echo cat tfvars.env
           export $(cat tfvars.env | xargs)
 
       - name: Create terraform.tfvars file
         run: |
           echo "Creating terraform.tfvars file..."
-          cat << EOF > terraform.tfvars
+          cat tfvars.env
           image_uri = "${IMAGE_URI}"
           public_subnet_ids = ${PUBLIC_SUBNET_IDS}
           alb_sg_id = "${ALB_SG_ID}"
