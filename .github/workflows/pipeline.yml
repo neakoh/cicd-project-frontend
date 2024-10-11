@@ -67,7 +67,7 @@ jobs:
           IMAGE_TAG="basic-blog:$TIMESTAMP"
           docker tag basic-blog:latest 851725435775.dkr.ecr.eu-west-2.amazonaws.com/$IMAGE_TAG
           docker push 851725435775.dkr.ecr.eu-west-2.amazonaws.com/$IMAGE_TAG
-          echo "TF_VAR_image_uri=851725435775.dkr.ecr.eu-west-2.amazonaws.com/$IMAGE_TAG" >> build.env
+          echo "TF_VAR_image_uri=851725435775.dkr.ecr.eu-west-2.amazonaws.com/$IMAGE_URI" >> build.env
 
       - name: Upload build.env as artifact
         uses: actions/upload-artifact@v3
@@ -129,7 +129,7 @@ jobs:
         run: |
           echo "Creating terraform.tfvars file..."
           cat << EOF > terraform.tfvars
-          image_uri = "${{ secrets.TF_VAR_IMAGE_URI }}"  # Assuming this is set in your secrets
+          image_uri = "${IMAGE_URI}"
           public_subnet_ids = ${PUBLIC_SUBNET_IDS}
           alb_sg_id = "${ALB_SG_ID}"
           container_sg_id = "${CONTAINER_SG_ID}"
@@ -140,7 +140,7 @@ jobs:
         run: |
           git config --global user.email "theenickymain@gmail.com"
           git config --global user.name "neakoh"
-          
+
       - name: Commit and push terraform.tfvars
         run: |
           git add terraform.tfvars
