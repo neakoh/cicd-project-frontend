@@ -146,38 +146,42 @@ jobs:
         with:
           name: tfvars
 
-      - name: Load environment variables
-        run: |
-          echo "Loading environment variables..."
-          export $(cat tfvars.env | xargs)
-          echo ${IMAGE_URI}
-
       - name: Check tfvars.env contents
         run: |
           echo "Contents of tfvars.env:"
           cat tfvars.env
 
+      - name: Load environment variables
+        run: |
+          echo "Loading environment variables..."
+          set -o allexport  # Automatically export all variables
+          source tfvars.env  # Load the variables from the file
+          set +o allexport  # Stop automatically exporting variables
+
+      - name: Verify loaded variables
+        run: |
+          echo "Verifying loaded environment variables..."
+          echo "IMAGE_URI: $IMAGE_URI"
+          echo "PUBLIC_SUBNET_IDS: $PUBLIC_SUBNET_IDS"
+          echo "ALB_SG_ID: $ALB_SG_ID"
+          echo "CONTAINER_SG_ID: $CONTAINER_SG_ID"
+          echo "VPC_ID: $VPC_ID"
+
       - name: Create terraform.tfvars file
         run: |
           echo "Creating terraform.tfvars file..."
-          echo ${IMAGE_URI}
           cat << EOF > terraform.tfvars
           image_uri = "${IMAGE_URI}"
-          public_subnet_ids = $PUBLIC_SUBNET_IDS
-          alb_sg_id = "$ALB_SG_ID"
-          container_sg_id = "$CONTAINER_SG_ID"
-          vpc_id = "$VPC_ID"
+          public_subnet_ids = ${PUBLIC_SUBNET_IDS}
+          alb_sg_id = "${ALB_SG_ID}"
+          container_sg_id = "${CONTAINER_SG_ID}"
+          vpc_id = "${VPC_ID}"
           EOF
-
-      - name: Check terraform.tfvars contents
-        run: |
-          echo "Contents of terraform.tfvars:"
-          cat terraform.tfvars
 
       - name: Set up Git
         run: |
-          git config --global user.email "theenickymain@gmail.com"
-          git config --global user.name "neakoh"
+          git config --global user.email "your-email@example.com"  # Replace with your email
+          git config --global user.name "your-github-username"  # Replace with your GitHub username
 
       - name: Commit and push terraform.tfvars
         run: |
