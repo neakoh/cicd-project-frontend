@@ -5,7 +5,7 @@ on:
     workflows: ["scan"]
     branches: [main]
     types: 
-      - complete
+      - completed
 
 jobs:
   build:
