@@ -160,8 +160,9 @@ jobs:
       - name: Create terraform.tfvars file
         run: |
           echo "Creating terraform.tfvars file..."
+          echo ${IMAGE_URI}
           cat << EOF > terraform.tfvars
-          image_uri = "$IMAGE_URI"
+          image_uri = "${IMAGE_URI}"
           public_subnet_ids = $PUBLIC_SUBNET_IDS
           alb_sg_id = "$ALB_SG_ID"
           container_sg_id = "$CONTAINER_SG_ID"
