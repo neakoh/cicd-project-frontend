@@ -67,13 +67,13 @@ jobs:
           IMAGE_TAG="basic-blog:$TIMESTAMP"
           docker tag basic-blog:latest 851725435775.dkr.ecr.eu-west-2.amazonaws.com/$IMAGE_TAG
           docker push 851725435775.dkr.ecr.eu-west-2.amazonaws.com/$IMAGE_TAG
-          echo "TF_VAR_image_uri=851725435775.dkr.ecr.eu-west-2.amazonaws.com/$IMAGE_URI" >> build.env
+          echo "TF_VAR_image_uri=851725435775.dkr.ecr.eu-west-2.amazonaws.com/$IMAGE_URI" >> tfvars.env
 
-      - name: Upload build.env as artifact
+      - name: Upload tfvars.env as artifact
         uses: actions/upload-artifact@v3
         with:
-          name: build-env
-          path: build.env
+          name: tfvars-env
+          path: tfvars.env
 
   fetch-outputs:
     runs-on: ubuntu-latest
@@ -105,13 +105,13 @@ jobs:
               "VPC_ID=\\(.attributes.value)"
             else
               empty
-            end' > terraform_outputs.env
+            end' > tfvars.env
 
       - name: Upload terraform_outputs.env as artifact
         uses: actions/upload-artifact@v3
         with:
-          name: terraform-outputs
-          path: terraform_outputs.env
+          name: tfvars-env
+          path: tfvars.env
 
   update-terraform:
     runs-on: ubuntu-latest
@@ -123,8 +123,7 @@ jobs:
       - name: Load environment variables
         run: |
           echo "Loading environment variables..."
-          export $(cat terraform_outputs.env | xargs)
-          export $(cat build.env | xargs)
+          export $(cat tfvars.env | xargs)
 
       - name: Create terraform.tfvars file
         run: |
