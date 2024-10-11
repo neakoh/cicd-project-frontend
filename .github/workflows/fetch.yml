@@ -8,7 +8,7 @@ on:
       - completed
 
 jobs:
-  fetch-terraform-outputs:
+  fetch-outputs:
       runs-on: ubuntu-latest
       needs: build
 

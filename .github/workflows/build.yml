@@ -5,7 +5,7 @@ on:
     workflows: ["scan"]
     branches: [main]
     types: 
-      - completed
+      - success
 
 jobs:
   build:
@@ -36,10 +36,16 @@ jobs:
           trivy image --exit-code 0 --severity HIGH,CRITICAL basic-blog:latest || true
           trivy image --format json --output trivy-results.json basic-blog:latest
 
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: eu-west-2
+
       - name: Log in to Amazon ECR
         run: |
           echo "Logging in to Amazon ECR..."
-          aws configure set aws_access_key_id ${{ secrets.AWS_ACCESS_KEY_ID }} | aws configure set aws_secret_access_key ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws ecr get-login-password --region ${{ secrets.AWS_DEFAULT_REGION }} | docker login --username AWS --password-stdin ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_DEFAULT_REGION }}.amazonaws.com
 
       - name: Push Docker image to ECR
