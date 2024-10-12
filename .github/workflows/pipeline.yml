@@ -67,7 +67,7 @@ jobs:
           IMAGE_TAG="basic-blog:$TIMESTAMP"
           docker tag basic-blog:latest 851725435775.dkr.ecr.eu-west-2.amazonaws.com/$IMAGE_TAG
           docker push 851725435775.dkr.ecr.eu-west-2.amazonaws.com/$IMAGE_TAG
-          docker push push neakoh/myrepo:$IMAGE_TAG
+          docker push neakoh/myrepo:$IMAGE_TAG
           echo "IMAGE_URI=851725435775.dkr.ecr.eu-west-2.amazonaws.com/$IMAGE_TAG" >> tfvars.env
 
       - name: Check tfvars.env file
