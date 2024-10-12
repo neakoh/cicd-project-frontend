@@ -86,7 +86,7 @@ jobs:
           name: tfvars
           path: tfvars.env
 
-    fetch-outputs:
+  fetch-outputs:
     runs-on: ubuntu-latest
     needs: build
     steps:
