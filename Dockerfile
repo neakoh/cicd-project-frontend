@@ -12,7 +12,7 @@ RUN apt-get update && \
     && docker-php-ext-install zip
 
 # Copying application files
-COPY . .
+COPY app/ ./
 
 EXPOSE 80
 

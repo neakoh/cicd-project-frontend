@@ -37,7 +37,7 @@ jobs:
       - name: Build Docker image
         run: |
           echo "Building Docker image..."
-          docker build -t neakoh/myrepo:latest .
+          docker build -t basic-blog:latest .
 
       - name: Run Trivy scan on Docker image
         run: |
@@ -63,11 +63,10 @@ jobs:
       - name: Push Docker image to ECR
         run: |
           echo "Pushing Docker image to ECR..."
-          # TIMESTAMP=$(date +%Y%m%d%H%M%S)
-          # IMAGE_TAG="basic-blog:$TIMESTAMP"
-          # docker tag basic-blog:latest 851725435775.dkr.ecr.eu-west-2.amazonaws.com/$IMAGE_TAG
-          # docker push 851725435775.dkr.ecr.eu-west-2.amazonaws.com/$IMAGE_TAG
-          docker push neakoh/myrepo:latest 
+          TIMESTAMP=$(date +%Y%m%d%H%M%S)
+          IMAGE_TAG="basic-blog:$TIMESTAMP"
+          docker tag basic-blog:latest 851725435775.dkr.ecr.eu-west-2.amazonaws.com/$IMAGE_TAG
+          docker push 851725435775.dkr.ecr.eu-west-2.amazonaws.com/$IMAGE_TAG
           echo "IMAGE_URI=851725435775.dkr.ecr.eu-west-2.amazonaws.com/$IMAGE_TAG" >> tfvars.env
 
       - name: Check tfvars.env file
