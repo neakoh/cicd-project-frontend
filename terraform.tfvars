@@ -1,5 +1,5 @@
-image_uri = "851725435775.dkr.ecr.eu-west-2.amazonaws.com/basic-blog:20241013093525"
-public_subnet_ids = ["subnet-0d18d3726ed928356","subnet-0f0e77937d4c544c1"]
-alb_sg_id = "sg-0e16cd48ddc612e13"
-container_sg_id = "sg-0164b526db26d2b73"
-vpc_id = "vpc-0c5d67cc6a1724722"
+image_uri = "851725435775.dkr.ecr.eu-west-2.amazonaws.com/basic-blog:20241021091544"
+public_subnet_ids = ["subnet-084615076587b9644","subnet-02fe8cfd74b62a81f"]
+alb_sg_id = "sg-06b8d70f9907e1c8f"
+container_sg_id = "sg-0ef2880ba7659ba05"
+vpc_id = "vpc-022ca9db5219da8f0"
