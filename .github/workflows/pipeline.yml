@@ -117,9 +117,9 @@ jobs:
             --ssl-no-revoke \
             -H "Authorization: Bearer ${{ secrets.HCP_TOKEN }}" \
             -H 'Content-Type: application/vnd.api+json' | \
-            jq -r '.data[] | select(.attributes.name | test("public_subnet_ids|alb-sg-id|container-sg-id|vpc_id")) | 
-            if .attributes.name == "public_subnet_ids" then
-              "PUBLIC_SUBNET_IDS=\(.attributes.value)"
+            jq -r '.data[] | select(.attributes.name | test("private_subnet_ids|alb-sg-id|container-sg-id|vpc_id")) | 
+            if .attributes.name == "private_subnet_ids" then
+              "PRIVATE_SUBNET_IDS=\(.attributes.value)"
             elif .attributes.name == "alb-sg-id" then
               "ALB_SG_ID=\(.attributes.value)"
             elif .attributes.name == "container-sg-id" then
@@ -162,21 +162,12 @@ jobs:
           sed -i 's/^/export /' tfvars.env
           source tfvars.env
 
-      - name: Verify loaded variables
-        run: |
-          echo "Verifying loaded environment variables..."
-          echo "IMAGE_URI: $IMAGE_URI"
-          echo "PUBLIC_SUBNET_IDS: $PUBLIC_SUBNET_IDS"
-          echo "ALB_SG_ID: $ALB_SG_ID"
-          echo "CONTAINER_SG_ID: $CONTAINER_SG_ID"
-          echo "VPC_ID: $VPC_ID"
-
       - name: Create terraform.tfvars file
         run: |
           echo "Creating terraform.tfvars file..."
           cat << EOF > terraform.tfvars
           image_uri = "${IMAGE_URI}"
-          public_subnet_ids = ${PUBLIC_SUBNET_IDS}
+          private_subnet_ids = ${PRIVATE_SUBNET_IDS}
           alb_sg_id = "${ALB_SG_ID}"
           container_sg_id = "${CONTAINER_SG_ID}"
           vpc_id = "${VPC_ID}"

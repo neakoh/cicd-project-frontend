@@ -45,7 +45,7 @@ variable "container_sg_id" {
   default     = ""
 }
 
-variable "public_subnet_ids" {
+variable "private_subnet_ids" {
   description = "A list of subnet IDs for the ECS service"
   type        = list(string)
   default     = [""] 
@@ -147,9 +147,9 @@ resource "aws_ecs_service" "example" {
   launch_type     = "FARGATE"
 
   network_configuration {
-    subnets          = var.public_subnet_ids
+    subnets          = var.private_subnet_ids
     security_groups  = [var.container_sg_id]
-    assign_public_ip = true 
+    assign_public_ip = false
   }
 
   load_balancer {
@@ -164,7 +164,7 @@ resource "aws_lb" "example" {
   internal           = false
   load_balancer_type = "application"
   security_groups    = [var.alb_sg_id] 
-  subnets            = var.public_subnet_ids               
+  subnets            = var.private_subnet_ids               
 
   enable_deletion_protection = false
 
