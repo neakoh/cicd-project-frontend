@@ -1,8 +1,10 @@
 name: update main.tf
 
 on:
+  workflow_dispatch:
   push:
     branches: [main]
+    
 
 jobs:
   scan:
